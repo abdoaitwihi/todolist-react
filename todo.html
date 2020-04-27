@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Web site created using create-react-app" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+    integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+    integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+
+  <title>todo App</title>
+  <style>
+    input:focus {
+      outline: none !important;
+    }
+
+    .fas,
+    .far {
+      cursor: pointer;
+
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  <script type="text/babel">
+
+    class App extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          tasks: [],
+          newTask: {
+            name: '',
+            key: '',
+            done: ''
+          }
+
+        }
+        if (localStorage.getItem('tasks')) {
+          let it = JSON.parse(localStorage.getItem('tasks'));
+          this.state.tasks = it;
+        }
+
+
+
+        this.addItem = this.addItem.bind(this);
+        this.handleInput = this.handleInput.bind(this);
+        this.deleteItem = this.deleteItem.bind(this);
+        this.done = this.done.bind(this);
+      }
+      addItem(e) {
+        e.preventDefault();
+        const newItem = this.state.newTask;
+        if (newItem.name !== '') {
+          const items = [...this.state.tasks, newItem];
+          this.setState({
+            tasks: items,
+            newTask: {
+              name: '',
+              key: '',
+              done: ''
+
+            }
+          })
+          let it = JSON.stringify(items);
+          localStorage.setItem('tasks', it)
+
+        }
+
+
+      }
+      handleInput(e) {
+        this.setState({
+          newTask: {
+            name: e.target.value,
+            key: Date.now(),
+            done: false
+
+          }
+        })
+      }
+      deleteItem(key) {
+        const filteredItems = this.state.tasks.filter(item =>
+          item.key !== key);
+        this.setState({
+          tasks: filteredItems
+        })
+        let it = JSON.stringify(filteredItems);
+        localStorage.setItem('tasks', it)
+
+
+      }
+      done(key) {
+        const items = this.state.tasks;
+        items.map(task => {
+          if (task.key == key) {
+            task.done = !task.done;
+          }
+        });
+
+        this.setState({ tasks: items })
+        let it = JSON.stringify(items);
+        localStorage.setItem('tasks', it)
+
+
+      }
+
+
+
+      render() {
+        return (
+          <div className=" mt-2 mx-auto col-sm-4 ">
+            <form className="row mx-auto d-flex justify-content-between form-group">
+              <input value={this.state.newTask.name} onChange={this.handleInput} className="col-9  form-control" type="text" />
+              <button onClick={this.addItem} className="form-control  col-3 float-right  btn btn-outline-primary">add</button>
+
+            </form>
+            <AddItems done={this.done} deleteItem={this.deleteItem} tasks={this.state.tasks} />
+
+          </div>
+        )
+      }
+
+    }
+    function AddItems(props) {
+      const tasks = props.tasks;
+
+      const DisplayItems = tasks.map(task => {
+        const danger = task.done ? 'alert alert-success' : 'alert alert-danger';
+        const check = task.done ? 'fas fa-check' : 'far fa-circle';
+        return (
+          <div key={task.key}>
+            <p className={danger}><i onClick={() => { props.done(task.key) }} className={check}> </i> {task.name}<i onClick={() => { props.deleteItem(task.key) }} className="far float-right fa-trash-alt"></i> </p>
+          </div>
+
+        )
+      })
+
+
+
+      return (
+        <div>  {DisplayItems}</div>
+
+
+      );
+    }
+
+
+
+
+
+    ReactDOM.render(
+      <App />,
+      document.getElementById('root')
+    );
+
+
+  </script>
+
+
+</body>
+
+</html>
